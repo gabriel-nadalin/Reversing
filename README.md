@@ -132,7 +132,7 @@ Agora sim, reescrevendo o nome das variáveis para representar suas funções, c
 
 ### **Entendendo a parte da encriptação**
 
-Depois de muito tempo analisando o código, a parte realmente mais útil para nós está na parte da main, vamos observar o que ela faz:
+Depois de muito tempo analisando o código, percebemos que a parte realmente mais útil para nós está na parte da main, vamos observar o que ela faz:
 
 ```c
 undefined8 main(void)
@@ -230,6 +230,7 @@ typedef struct eh_frame_hdr eh_frame_hdr, *Peh_frame_hdr;
 
 
 int main(void){
+    // Também vai conter as mesmas variáveis
     int iVar1;
     time_t tVar2;
     long in_FS_OFFSET;
@@ -242,6 +243,7 @@ int main(void){
     FILE *arquivoOut;
     long local_10;
 
+    // Parte de abrir o arquivo e obter o tamanho total
     arquivoIn = fopen("flag.enc","rb");
     fseek(arquivoIn,0,2);
     size = ftell(arquivoIn) - 4;
@@ -251,18 +253,39 @@ int main(void){
     fread(pointer,size,1,arquivoIn);
     fclose(arquivoIn);
     srand(seed);
+
+    // Rodando, para cada caractere do arquivo encriptado, o cálculo para obter os caracteres originais
     for (i = 0; i < (long)size; i = i + 1) {
         iVar1 = rand();
         local_3c = rand();
         local_3c = local_3c & 7;
+        // Como tinhamos invertido a primeira parte do texto com a segunda parte, agora iremos voltar ao normal colocando a segunda parte da primeira parte.
+        // Exemplo:
+        /*
+            Se tinhamos o texto AHjkEiSjWqA e local_3c é 5, então temos:
+            primeira parte: AHjkE
+            segunda parte: iSjWqA
+            Queremos ficar com iSjWqAAHjkE, logo, vamos apenas inverter essas partes de lugares.
+        */
         *(byte *)((long)pointer + i) =
+                // Fazemos um local_3c bit shif para a direita para ficar com a primeira parte do texto
                 *(byte *)((long)pointer + i) >> (byte)local_3c |
+                // Aqui, fazemos um local_3c bit shift para a esquerda para ficar com a segunda parte do texto 
                 *(byte *)((long)pointer + i) << 8 - (byte)local_3c;
         *(byte *)((long)pointer + i) = *(byte *)((long)pointer + i) ^ (byte)iVar1;
     }
+    // Escreve o resultado descriptado dentro do flag.dec
     arquivoOut = fopen("flag.dec","wb");
     fwrite(pointer,1,size,arquivoOut);
     fclose(arquivoOut);
     return 0;
 }
 ```
+
+### Testes e resultados
+
+#### **Como saber se o nosso programa de descriptação está funcionando?**
+
+A resposta é simples, vamos pegar o arquivo original da flag encriptada que o próprio exercício nos deu e aplicar no nosso programa. Se aparecer a flag no formato flag{algoaqui} então saberemos que deu certo.
+
+**Testando**
