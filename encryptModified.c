@@ -49,39 +49,39 @@ typedef ulong size_t;
 
 struct _IO_FILE {
     int _flags;
-    char *_IO_read_ptr;
-    char *_IO_read_end;
-    char *_IO_read_base;
-    char *_IO_write_base;
-    char *_IO_write_ptr;
-    char *_IO_write_end;
-    char *_IO_buf_base;
-    char *_IO_buf_end;
-    char *_IO_save_base;
-    char *_IO_backup_base;
-    char *_IO_save_end;
-    struct _IO_marker *_markers;
-    struct _IO_FILE *_chain;
+    char * _IO_read_ptr;
+    char * _IO_read_end;
+    char * _IO_read_base;
+    char * _IO_write_base;
+    char * _IO_write_ptr;
+    char * _IO_write_end;
+    char * _IO_buf_base;
+    char * _IO_buf_end;
+    char * _IO_save_base;
+    char * _IO_backup_base;
+    char * _IO_save_end;
+    struct _IO_marker * _markers;
+    struct _IO_FILE * _chain;
     int _fileno;
     int _flags2;
     __off_t _old_offset;
     ushort _cur_column;
     char _vtable_offset;
     char _shortbuf[1];
-    _IO_lock_t *_lock;
+    _IO_lock_t * _lock;
     __off64_t _offset;
-    void *__pad1;
-    void *__pad2;
-    void *__pad3;
-    void *__pad4;
+    void * __pad1;
+    void * __pad2;
+    void * __pad3;
+    void * __pad4;
     size_t __pad5;
     int _mode;
     char _unused2[20];
 };
 
 struct _IO_marker {
-    struct _IO_marker *_next;
-    struct _IO_FILE *_sbuf;
+    struct _IO_marker * _next;
+    struct _IO_FILE * _sbuf;
     int _pos;
 };
 
@@ -568,39 +568,39 @@ undefined8 main(void)
   int iVar1;
   time_t tVar2;
   long in_FS_OFFSET;
-  uint local_40;
+  uint seed;
   uint local_3c;
-  long local_38;
-  FILE *local_30;
-  size_t local_28;
-  void *local_20;
-  FILE *local_18;
+  long i;
+  FILE *arquivoIn;
+  size_t size;
+  void *pointer;
+  FILE *arquivoOut;
   long local_10;
   
   local_10 = *(long *)(in_FS_OFFSET + 0x28);
-  local_30 = fopen("flag","rb");
-  fseek(local_30,0,2);
-  local_28 = ftell(local_30);
-  fseek(local_30,0,0);
-  local_20 = malloc(local_28);
-  fread(local_20,local_28,1,local_30);
-  fclose(local_30);
+  arquivoIn = fopen("flag","rb");
+  fseek(arquivoIn,0,2);
+  size = ftell(arquivoIn);
+  fseek(arquivoIn,0,0);
+  pointer = malloc(size);
+  fread(pointer,size,1,arquivoIn);
+  fclose(arquivoIn);
   tVar2 = time((time_t *)0x0);
-  local_40 = (uint)tVar2;
-  srand(local_40);
-  for (local_38 = 0; local_38 < (long)local_28; local_38 = local_38 + 1) {
+  seed = (uint)tVar2;
+  srand(seed);
+  for (i = 0; i < (long)size; i = i + 1) {
     iVar1 = rand();
-    *(byte *)((long)local_20 + local_38) = *(byte *)((long)local_20 + local_38) ^ (byte)iVar1;
+    *(byte *)((long)pointer + i) = *(byte *)((long)pointer + i) ^ (byte)iVar1;
     local_3c = rand();
     local_3c = local_3c & 7;
-    *(byte *)((long)local_20 + local_38) =
-         *(byte *)((long)local_20 + local_38) << (sbyte)local_3c |
-         *(byte *)((long)local_20 + local_38) >> 8 - (sbyte)local_3c;
+    *(byte *)((long)pointer + i) =
+         *(byte *)((long)pointer + i) << (sbyte)local_3c |
+         *(byte *)((long)pointer + i) >> 8 - (sbyte)local_3c;
   }
-  local_18 = fopen("flag.enc","wb");
-  fwrite(&local_40,1,4,local_18);
-  fwrite(local_20,1,local_28,local_18);
-  fclose(local_18);
+  arquivoOut = fopen("flag.enc","wb");
+  fwrite(&seed,1,4,arquivoOut);
+  fwrite(pointer,1,size,arquivoOut);
+  fclose(arquivoOut);
   if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
                     // WARNING: Subroutine does not return
     __stack_chk_fail();
