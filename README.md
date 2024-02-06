@@ -1,6 +1,6 @@
 # Simple Encryptor - Reverse Engineering
 
-## Descrição do problema
+# Descrição do problema
 
 O nosso desafio foi escolhido na plataforma HackTheBox e tem como título o nome **Simple Encryptor**.
 
@@ -19,9 +19,9 @@ Além da descrição mostrada acima, temos como base os seguintes arquivos:
     <br> Esse arquivo possui o conteúdo encriptografado gerado por meio do arquivo encrypt
 
 
-## Resolução do problema
+# Resolução do problema
 
-### **Transformação do código de encriptação**
+## **Transformação do código de encriptação**
 
 Quando pegamos para solucionar o problema descrito nos deparamos com aquele arquivo encrypt e pensamos em como obter o conteúdo dentro dele, para saber mais sobre o programa de encriptação. Para isso ser feito, utilizamos o programa Ghidra para gerar o **arquivo em linguagem c** equivalente ao arquivo **encrypt binário**.
 
@@ -30,6 +30,7 @@ Após a conversão, ficamos com o arquivo ```encrypt.c``` que contém o código 
 Aqui abaixo podemos ver uma parte desse arquivo encrypt.c:
 
 ```c
+// Apenas mostrando a parte da função main
 undefined8 main(void)
 
 {
@@ -82,6 +83,7 @@ undefined8 main(void)
 Para resolver esse impasse, vamos reescrever essas variáveis com nomes mais legíveis para facilitar o processo de entendimento (Geramos então o código do arquivo encryptModified.c):
 
 ```c
+// Apenas mostrando a parte da função main
 undefined8 main(void)
 {
   int iVar1;
@@ -130,7 +132,7 @@ undefined8 main(void)
 
 Agora sim, reescrevendo o nome das variáveis para representar suas funções, conseguiremos avançar com mais facilidade pelo programa.
 
-### **Entendendo a parte da encriptação**
+## **Entendendo a parte da encriptação**
 
 Depois de muito tempo analisando o código, percebemos que a parte realmente mais útil para nós está na parte da main, vamos observar o que ela faz:
 
@@ -202,11 +204,11 @@ undefined8 main(void)
 Como mostrado no código, a parte fundamental do problema é a linha ```fwrite(&seed,1,4,arquivoOut);``` <br><br>
 Através dela conseguiremos saber, dado um arquivo criptografado, qual foi a seed usada para gerar os caracteres e consequentemente, dá para transformá-los no conteúdo original, antes da encriptação. 
 
-### Criando código para desencriptação
+## Criando código para desencriptação
 
 Agora que sabemos que a seed usada para encriptação dos dados está contida nos primeiros 4 bytes do arquivo gerado, podemos pegá-la para criar o nosso próprio algoritmo de desencriptação. Faremos isso no arquivo decrypt.c.
 
-O conteúdo do programa que criamos está mostrado abaixo e faz o inverso do arquivo de encryptação para conseguirmos o conteúdo original e consequentemente a flag:
+O conteúdo do programa que criamos está mostrado abaixo e faz o inverso do arquivo de encryptação para conseguirmos o conteúdo original:
 
 ```c
 #include <stdio.h>
@@ -282,10 +284,14 @@ int main(void){
 }
 ```
 
-### Testes e resultados
-
-#### **Como saber se o nosso programa de descriptação está funcionando?**
+## **Como saber se o nosso programa de descriptação está funcionando?**
 
 A resposta é simples, vamos pegar o arquivo original da flag encriptada que o próprio exercício nos deu e aplicar no nosso programa. Se aparecer a flag no formato flag{algoaqui} então saberemos que deu certo.
 
-**Testando**
+- **Conteúdo do arquivo flag.enc que recebemos do exercício:**
+![ImagemEnc](./FlagEnc.png)
+
+- **Após rodar o nosso programa de desencriptação:**
+![ImagemDesc](./FlagDec.png)
+
+Com isso, após rodar o nosso algoritmo, obtivemos a flag no arquivo flag.dec com o conteúdo ```HTB{vRy_s1MplE_F1LE3nCryp0r}``` e ao marcar no HackTheBox, concluímos com sucesso o desafio.
