@@ -21,13 +21,182 @@ Além da descrição mostrada acima, temos como base os seguintes arquivos:
 
 ## Resolução do problema
 
+### **Transformação do código de encriptação**
+
 Quando pegamos para solucionar o problema descrito nos deparamos com aquele arquivo encrypt e pensamos em como obter o conteúdo dentro dele, para saber mais sobre o programa de encriptação. Para isso ser feito, utilizamos o programa Ghidra para gerar o **arquivo em linguagem c** equivalente ao arquivo **encrypt binário**.
 
-Após a conversão, ficamos com o seguinte código:
+Após a conversão, ficamos com o arquivo ```encrypt.c``` que contém o código em linguagem C.
+
+Aqui abaixo podemos ver uma parte desse arquivo encrypt.c:
 
 ```c
+undefined8 main(void)
 
+{
+  int iVar1;
+  time_t tVar2;
+  long in_FS_OFFSET;
+  uint local_40;
+  uint local_3c;
+  long local_38;
+  FILE *local_30;
+  size_t local_28;
+  void *local_20;
+  FILE *local_18;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  local_30 = fopen("flag","rb");
+  fseek(local_30,0,2);
+  local_28 = ftell(local_30);
+  fseek(local_30,0,0);
+  local_20 = malloc(local_28);
+  fread(local_20,local_28,1,local_30);
+  fclose(local_30);
+  tVar2 = time((time_t *)0x0);
+  local_40 = (uint)tVar2;
+  srand(local_40);
+  for (local_38 = 0; local_38 < (long)local_28; local_38 = local_38 + 1) {
+    iVar1 = rand();
+    *(byte *)((long)local_20 + local_38) = *(byte *)((long)local_20 + local_38) ^ (byte)iVar1;
+    local_3c = rand();
+    local_3c = local_3c & 7;
+    *(byte *)((long)local_20 + local_38) =
+         *(byte *)((long)local_20 + local_38) << (sbyte)local_3c |
+         *(byte *)((long)local_20 + local_38) >> 8 - (sbyte)local_3c;
+  }
+  local_18 = fopen("flag.enc","wb");
+  fwrite(&local_40,1,4,local_18);
+  fwrite(local_20,1,local_28,local_18);
+  fclose(local_18);
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    // WARNING: Subroutine does not return
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
 
+É fácil de notar que os nomes das variáveis estão todos com indicação numérica e de difícil identificação de acordo com suas funcionalidades.
+
+Para resolver esse impasse, vamos reescrever essas variáveis com nomes mais legíveis para facilitar o processo de entendimento (Geramos então o código do arquivo encryptModified.c):
+
+```c
+undefined8 main(void)
+{
+  int iVar1;
+  time_t tVar2;
+  long in_FS_OFFSET;
+  uint seed;
+  uint local_3c;
+  long i;
+  FILE *arquivoIn;
+  size_t size;
+  void *pointer;
+  FILE *arquivoOut;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  arquivoIn = fopen("flag","rb");
+  fseek(arquivoIn,0,2);
+  size = ftell(arquivoIn);
+  fseek(arquivoIn,0,0);
+  pointer = malloc(size);
+  fread(pointer,size,1,arquivoIn);
+  fclose(arquivoIn);
+  tVar2 = time((time_t *)0x0);
+  seed = (uint)tVar2;
+  srand(seed);
+  for (i = 0; i < (long)size; i = i + 1) {
+    iVar1 = rand();
+    *(byte *)((long)pointer + i) = *(byte *)((long)pointer + i) ^ (byte)iVar1;
+    local_3c = rand();
+    local_3c = local_3c & 7;
+    *(byte *)((long)pointer + i) =
+         *(byte *)((long)pointer + i) << (sbyte)local_3c |
+         *(byte *)((long)pointer + i) >> 8 - (sbyte)local_3c;
+  }
+  arquivoOut = fopen("flag.enc","wb");
+  fwrite(&seed,1,4,arquivoOut);
+  fwrite(pointer,1,size,arquivoOut);
+  fclose(arquivoOut);
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    // WARNING: Subroutine does not return
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
+
+Agora sim, reescrevendo o nome das variáveis para representar suas funções, conseguiremos avançar com mais facilidade pelo programa.
+
+### **Entendendo a parte da encriptação**
+
+Depois de muito tempo analisando o código, a parte realmente mais útil para nós está na parte da main, vamos observar o que ela faz:
+
+```c
+undefined8 main(void)
+{
+  // Variáveis usadas para acesso ao arquivo, manipulação de offset, seed para números aleatórios e entre outros
+  int iVar1;
+  time_t tVar2;
+  long in_FS_OFFSET;
+  uint seed;
+  uint local_3c;
+  long i;
+  FILE *arquivoIn;
+  size_t size;
+  void *pointer;
+  FILE *arquivoOut;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  
+  // Abrindo arquivo para leitura em binário
+  arquivoIn = fopen("flag","rb");
+  // O 2 representa SEEK_END e faz o ponteiro ir para o fim do arquivo
+  fseek(arquivoIn,0,2);
+  // Pega o tamanho do arquivo com base na última posição válida do arquivo e na primeira posição válida do arquivo
+  size = ftell(arquivoIn);
+  fseek(arquivoIn,0,0);
+  pointer = malloc(size);
+  // Copia para o pointer, todo o conteúdo do arquivo
+  fread(pointer,size,1,arquivoIn);
+  fclose(arquivoIn);
+  // Cria variável que representa o tempo atual
+  tVar2 = time((time_t *)0x0);
+  // Cria seed e usa para gerar números alatórios
+  seed = (uint)tVar2;
+  srand(seed);
+  // Para cada caractere do arquivo, vamos executar um algoritmo
+  for (i = 0; i < (long)size; i = i + 1) {
+    // Gera número aleatório
+    iVar1 = rand();
+    // Realiza XOR bit a bit entre o caractere do arquivo e a variável aleatória e coloca naquela posição do pointer
+    *(byte *)((long)pointer + i) = *(byte *)((long)pointer + i) ^ (byte)iVar1;
+    // Gera variável aleatória que estará entre 0 e 7
+    // Isso é possível pois quando fazemos um AND com 7, estamos considerando apenas os 3 primeiros bits do número aleatório, que faz o mesmo estar dentro do range de 0 até 7
+    local_3c = rand();
+    local_3c = local_3c & 7;
+    // Dado o conteúdo do arquivo, que está representado pelo conteúdo apontado pelo ponteiro, vamos dividí-lo com base na variável aleatória local_3c
+    // Em seguida, iremos pegar a primeira parte (caracteres da posição 0 até posição local_3c - 1) e inverter com a segunda parte (caracteres da posição local_3c até size-1)
+    *(byte *)((long)pointer + i) =
+         *(byte *)((long)pointer + i) << (sbyte)local_3c |
+         *(byte *)((long)pointer + i) >> 8 - (sbyte)local_3c;
+  }
+  // Abre arquivo para escrita em binário
+  arquivoOut = fopen("flag.enc","wb");
+  // Escreve a seed usada, como os primeiros 4 bytes do arquivo (!!!!MUITO IMPORTANTE ISSO!!!!)
+  fwrite(&seed,1,4,arquivoOut);
+  // Escreve a flag criptografada no restante do arquivo
+  fwrite(pointer,1,size,arquivoOut);
+  fclose(arquivoOut);
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    // WARNING: Subroutine does not return
+    __stack_chk_fail();
+  }
+  return 0;
+}
 ```
 
 

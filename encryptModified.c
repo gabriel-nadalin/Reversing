@@ -563,7 +563,6 @@ void frame_dummy(void)
 
 
 undefined8 main(void)
-
 {
   int iVar1;
   time_t tVar2;
