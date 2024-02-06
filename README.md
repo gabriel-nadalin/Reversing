@@ -288,10 +288,11 @@ int main(void){
 
 A resposta é simples, vamos pegar o arquivo original da flag encriptada que o próprio exercício nos deu e aplicar no nosso programa. Se aparecer a flag no formato flag{algoaqui} então saberemos que deu certo.
 
-- **Conteúdo do arquivo flag.enc que recebemos do exercício:**
+- **Conteúdo do arquivo flag.enc que recebemos do exercício:** <br>
 ![ImagemEnc](./FlagEnc.png)
+<br>
 
-- **Após rodar o nosso programa de desencriptação:**
+- **Após rodar o nosso programa de desencriptação:** <br>
 ![ImagemDesc](./FlagDec.png)
 
 Com isso, após rodar o nosso algoritmo, obtivemos a flag no arquivo flag.dec com o conteúdo ```HTB{vRy_s1MplE_F1LE3nCryp0r}``` e ao marcar no HackTheBox, concluímos com sucesso o desafio.
