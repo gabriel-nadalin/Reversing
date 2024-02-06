@@ -296,3 +296,10 @@ A resposta é simples, vamos pegar o arquivo original da flag encriptada que o p
 ![ImagemDesc](./FlagDec.png)
 
 Com isso, após rodar o nosso algoritmo, obtivemos a flag no arquivo flag.dec com o conteúdo ```HTB{vRy_s1MplE_F1LE3nCryp0r}``` e ao marcar no HackTheBox, concluímos com sucesso o desafio.
+
+## Link para os arquivos
+
+- Arquivo encrypt: https://github.com/gabriel-nadalin/Reversing/blob/main/encrypt 
+- Arquivo encrypt com as variáveis renomeadas: https://github.com/gabriel-nadalin/Reversing/blob/main/encryptModified.c
+- Arquivo decrypt que criamos: https://github.com/gabriel-nadalin/Reversing/blob/main/decrypt.c
+- Programa original de encriptação: https://github.com/gabriel-nadalin/Reversing/blob/main/encrypt
